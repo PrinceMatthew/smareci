@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.smareci.app.smareci">
+    package="com.smareci.app">
    <application
         android:label="smareci"
         android:name="${applicationName}"

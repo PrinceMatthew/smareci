@@ -1,28 +1,34 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
-import 'package:smareci/api.dart';
-import 'package:smareci/assets/recyclePoint.dart';
-import 'package:smareci/config.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class RecyclePage extends StatefulWidget {
-  const RecyclePage({super.key, required this.id, required this.name});
+import '../api.dart';
+import '../assets/recyclePoint.dart';
+import '../config.dart';
 
-  final String id, name;
+class addRecycledItems extends StatefulWidget {
+  const addRecycledItems({
+    super.key,
+    required this.id,
+    required this.plastic,
+    required this.hartie,
+    required this.sticla,
+    required this.location,
+  });
+
+  final String id;
+  final double plastic, hartie, sticla;
+  final LatLng location;
 
   @override
-  State<RecyclePage> createState() => _RecyclePageState();
+  State<addRecycledItems> createState() => _addRecycledItemsState();
 }
 
-class _RecyclePageState extends State<RecyclePage> {
-  late Future getRecyclePointDataFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    getRecyclePointDataFuture = _getRecyclePointData();
-  }
+class _addRecycledItemsState extends State<addRecycledItems> {
+  late double _recycledPlastic = 0;
+  late double _recycledSticla = 0;
+  late double _recycledHartie = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,83 +36,113 @@ class _RecyclePageState extends State<RecyclePage> {
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              widget.name,
+            const Text(
+              "Spune-ne cât vrei să reciclezi",
               style: TextStyle(
                 color: Colors.grey,
-                fontSize: 32,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 8,
             ),
-            Text("Grad de ocupare al punctului de reciclare"),
-            SizedBox(
+            const Text(
+              "(în ambalaje)",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
               height: 32,
             ),
-            FutureBuilder(
-              future: getRecyclePointDataFuture,
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.hasData) {
-                  recyclePoint data = snapshot.data;
-                  return Column(
-                    children: [
-                      CircularPercentIndicator(
-                        radius: 60.0,
-                        lineWidth: 10.0,
-                        percent: data.statPlastic,
-                        animation: true,
-                        center: Text("Plastic/Metal"),
-                        progressColor: Colors.yellowAccent,
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      CircularPercentIndicator(
-                        radius: 60.0,
-                        lineWidth: 10.0,
-                        percent: data.statSticla,
-                        animation: true,
-                        center: Text("Sticlă"),
-                        progressColor: Colors.blueAccent,
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      CircularPercentIndicator(
-                        radius: 60.0,
-                        lineWidth: 10.0,
-                        percent: data.statHartie,
-                        animation: true,
-                        center: Text("Hârtie/Carton"),
-                        progressColor: Colors.brown,
-                      ),
-                    ],
-                  );
-                }
-                return Column(
-                  children: const [
-                    Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.amber,
-                        strokeWidth: 3,
-                      ),
-                    )
-                  ],
-                );
+            Slider(
+              activeColor: Colors.amber,
+              inactiveColor: Colors.amberAccent,
+              value: _recycledPlastic,
+              max: (1 - widget.plastic) * 100,
+              divisions: 100,
+              label: _recycledPlastic.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _recycledPlastic = value;
+                });
               },
             ),
-            SizedBox(
+            const Text(
+              "Plastic",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Slider(
+              activeColor: Colors.brown,
+              inactiveColor: Colors.brown,
+              value: _recycledHartie,
+              max: (1 - widget.hartie) * 100,
+              divisions: 100,
+              label: _recycledHartie.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _recycledHartie = value;
+                });
+              },
+            ),
+            const Text(
+              "Hartie",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Slider(
+              inactiveColor: Colors.blueAccent,
+              value: _recycledSticla,
+              max: (1 - widget.sticla) * 100,
+              divisions: 100,
+              label: _recycledSticla.round().toString(),
+              onChanged: (double value) {
+                setState(() {
+                  _recycledSticla = value;
+                });
+              },
+            ),
+            const Text(
+              "Sticla",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
               height: 32,
             ),
             MaterialButton(
               onPressed: () async {
-                await launchUrl(Uri.parse(
-                    "https://hartareciclarii.ro/cum-reciclez/14-obiecte-care-credeai-ca-se-recicleaza/"));
+                var awaitPointData = await ApiClient.database.listDocuments(
+                  collectionId: Config.recyclePointsID,
+                  queries: [Query.equal("id", widget.id)],
+                );
+                var recyclePointData = awaitPointData.documents
+                    .map((document) => recyclePoint.fromJson(document.data))
+                    .first;
+                recyclePointData.statPlastic += _recycledPlastic.round() / 100;
+                recyclePointData.statHartie += _recycledHartie.round() / 100;
+                recyclePointData.statSticla += _recycledSticla.round() / 100;
+                var mapOfData = recyclePointData.toMap();
+                await ApiClient.database.updateDocument(collectionId: Config.recyclePointsID, documentId: recyclePointData.docID, data: mapOfData);
+                String gmapsLink =
+                    'https://www.google.com/maps/search/?api=1&query=${widget.location.latitude},${widget.location.longitude}';
+                await launchUrl(Uri.parse(gmapsLink));
               },
               elevation: 0,
               height: 35,
@@ -114,21 +150,8 @@ class _RecyclePageState extends State<RecyclePage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              child: Text(
-                "Vezi ce nu poate fi reciclat",
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            MaterialButton(
-              onPressed: () {},
-              elevation: 0,
-              height: 35,
-              color: Colors.grey.shade200,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Text(
-                "Vreau să reciclez!",
+              child: const Text(
+                "Reciclează acum!",
                 style: TextStyle(color: Colors.black),
               ),
             ),
@@ -136,24 +159,5 @@ class _RecyclePageState extends State<RecyclePage> {
         ),
       ),
     );
-  }
-
-  Future<recyclePoint?> _getRecyclePointData() async {
-    try {
-      var awaitPointData = await ApiClient.database.listDocuments(
-        collectionId: Config.recyclePointsID,
-        queries: [Query.equal("id", widget.id)],
-      );
-      var recyclePointData = awaitPointData.documents
-          .map((document) => recyclePoint.fromJson(document.data))
-          .first;
-      return recyclePoint(
-        statPlastic: recyclePointData.statPlastic,
-        statSticla: recyclePointData.statSticla,
-        statHartie: recyclePointData.statHartie,
-      );
-    } on AppwriteException catch (e) {
-      print(e.message);
-    }
   }
 }

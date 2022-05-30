@@ -1,4 +1,4 @@
-package com.smareci.app.smareci
+package com.smareci.app
 
 import io.flutter.embedding.android.FlutterActivity
 

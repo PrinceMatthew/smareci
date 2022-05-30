@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:smareci/api.dart';
 import 'package:smareci/assets/map_styles.dart';
 import 'package:smareci/assets/recycle_points.dart';
-import 'package:smareci/pages/recycle.dart';
+import 'package:smareci/pages/pointData.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -13,12 +14,24 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late GoogleMapController _controller;
+  late Future createAnonymousAccountFuture;
   Set<Marker> _markers = {};
 
   static const CameraPosition _kBucharest = CameraPosition(
     target: LatLng(44.439663, 26.096306),
     zoom: 10.8,
   );
+
+  @override
+  void initState()
+  {
+    super.initState();
+    createAnonymousAccountFuture = _getNewAccount();
+  }
+
+  _getNewAccount() async {
+    return await ApiClient.account.createAnonymousSession();;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +52,7 @@ class _HomeState extends State<Home> {
           Positioned(
             top: 40,
             child: Column(
-              children: [
+              children: const [
                 Text(
                   "Smareci",
                   style: TextStyle(
@@ -76,7 +89,7 @@ class _HomeState extends State<Home> {
           snippet: "Apasă pentru detalii",
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (BuildContext context) => RecyclePage(id: point["id"], name: point["name"],)));
+                builder: (BuildContext context) => RecyclePage(id: point["id"], name: point["name"], location: point['position'],)));
           },
         ),
       );
