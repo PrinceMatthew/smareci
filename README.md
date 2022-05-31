@@ -10,3 +10,6 @@ Pentru construirea aplicației, am folosit librăriile:
 > - [appwrite](https://pub.dev/packages/appwrite "appwrite")
 
 Appwrite este un pachet Docker care ajută la implementarea unei baze de date în aplicații scrise în Dart.
+
+**Atentie!**
+Pentru construirea aplicatiei, este nevoie de o cheie API pentru Google Maps care se poate obtine pe [Google Cloud](https://cloud.google.com). Cheia trebuie salvata intr-un fisier numit `android/local.properties` cu denumirea `GMAPS_KEY`. Cheia API este astfel protejata de a fi divulgata in repository-ul public, deoarece fisierul `local.properties` este adaugat in `android/.gitignore`.
