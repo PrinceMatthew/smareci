@@ -38,7 +38,8 @@ dependencies:
   custom_info_window: ^1.0.1
   percent_indicator: ^4.2.2
   url_launcher: ^6.1.2
-  appwrite: ^5.0.0
+  appwrite: ^6.0.0
+  flutter_barcode_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:

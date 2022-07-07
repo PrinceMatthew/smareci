@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smareci/api.dart';
 import 'package:smareci/assets/map_styles.dart';
-import 'package:smareci/assets/recycle_points.dart';
+import 'package:smareci/assets/recycle_points_list.dart';
 import 'package:smareci/pages/pointData.dart';
 
 class Home extends StatefulWidget {
@@ -82,7 +82,7 @@ class _HomeState extends State<Home> {
 
     recyclePoints.forEach((point) async {
       marker = Marker(
-        markerId: MarkerId(point['id']),
+        markerId: MarkerId(point['id'].toString()),
         position: point['position'],
         infoWindow: InfoWindow(
           title: point['name'],

@@ -15,7 +15,8 @@ class RecyclePage extends StatefulWidget {
       required this.name,
       required this.location});
 
-  final String id, name;
+  final int id;
+  final String name;
   final LatLng location;
 
   @override
@@ -24,7 +25,9 @@ class RecyclePage extends StatefulWidget {
 
 class _RecyclePageState extends State<RecyclePage> {
   late Future getRecyclePointDataFuture;
-  late double hartie, plastic, sticla;
+  // Capacitatea maxima a containerelor este de 100L
+  static int maxCapacity = 100000;
+  late int hartie, plastic, sticla;
 
   @override
   void initState() {
@@ -69,7 +72,7 @@ class _RecyclePageState extends State<RecyclePage> {
                       CircularPercentIndicator(
                         radius: 60.0,
                         lineWidth: 10.0,
-                        percent: data.statPlastic,
+                        percent: data.statPlastic.toDouble() / 100000,
                         animation: true,
                         center: Text("Plastic/Metal"),
                         progressColor: Colors.yellowAccent,
@@ -80,7 +83,7 @@ class _RecyclePageState extends State<RecyclePage> {
                       CircularPercentIndicator(
                         radius: 60.0,
                         lineWidth: 10.0,
-                        percent: data.statSticla,
+                        percent: data.statSticla.toDouble() / 100000,
                         animation: true,
                         center: Text("Sticlă"),
                         progressColor: Colors.blueAccent,
@@ -91,7 +94,7 @@ class _RecyclePageState extends State<RecyclePage> {
                       CircularPercentIndicator(
                         radius: 60.0,
                         lineWidth: 10.0,
-                        percent: data.statHartie,
+                        percent: data.statHartie.toDouble() / 100000,
                         animation: true,
                         center: Text("Hârtie/Carton"),
                         progressColor: Colors.brown,
@@ -132,7 +135,7 @@ class _RecyclePageState extends State<RecyclePage> {
             ),
             MaterialButton(
               onPressed: () async {
-                if (plastic == 1 && hartie == 1 && sticla == 1) {
+                if (plastic == maxCapacity && hartie == maxCapacity && sticla == maxCapacity) {
                   const snack = SnackBar(
                     content:
                         Text("Momentan nu mai poti recicla la acest punct."),
@@ -142,9 +145,9 @@ class _RecyclePageState extends State<RecyclePage> {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (BuildContext context) => addRecycledItems(
                       id: widget.id,
-                      plastic: plastic,
-                      sticla: sticla,
-                      hartie: hartie,
+                      plastic: maxCapacity - plastic,
+                      sticla: maxCapacity - sticla,
+                      hartie: maxCapacity - hartie,
                       location: widget.location,
                     ),
                   ));
@@ -171,7 +174,7 @@ class _RecyclePageState extends State<RecyclePage> {
     try {
       var awaitPointData = await ApiClient.database.listDocuments(
         collectionId: Config.recyclePointsID,
-        queries: [Query.equal("id", widget.id)],
+        queries: [Query.equal("pointID", widget.id)],
       );
       var recyclePointData = awaitPointData.documents
           .map((document) => recyclePoint.fromJson(document.data))

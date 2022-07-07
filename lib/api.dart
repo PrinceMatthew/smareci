@@ -12,7 +12,7 @@ class ApiClient {
     return client;
   }
 
-  static Database get database => Database(_instance._client);
+  static Databases get database => Databases(_instance._client, databaseId: Config.databaseID);
   static Account get account => Account(_instance._client);
 
   static final ApiClient _instance = ApiClient._internal();

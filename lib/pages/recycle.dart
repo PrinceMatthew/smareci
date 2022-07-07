@@ -2,6 +2,8 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 import '../api.dart';
 import '../assets/recyclePoint.dart';
@@ -17,8 +19,8 @@ class addRecycledItems extends StatefulWidget {
     required this.location,
   });
 
-  final String id;
-  final double plastic, hartie, sticla;
+  final int id;
+  final int plastic, hartie, sticla;
   final LatLng location;
 
   @override
@@ -26,9 +28,12 @@ class addRecycledItems extends StatefulWidget {
 }
 
 class _addRecycledItemsState extends State<addRecycledItems> {
-  late double _recycledPlastic = 0;
-  late double _recycledSticla = 0;
-  late double _recycledHartie = 0;
+  late int _recycledPlastic = 0;
+  late int _recycledSticla = 0;
+  late int _recycledHartie = 0;
+  late double _progressPlastic = 0, _progressSticla = 0, _progressHartie = 0;
+  late String _objectType = '';
+  TextEditingController _objectVolume = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
-              "Spune-ne cât vrei să reciclezi",
+              "Scanează codurile produselor",
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 22,
@@ -48,79 +53,136 @@ class _addRecycledItemsState extends State<addRecycledItems> {
               ),
             ),
             const SizedBox(
-              height: 8,
+              height: 6,
             ),
-            const Text(
-              "(în ambalaje)",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            MaterialButton(
+              onPressed: () {},
+              elevation: 0,
+              height: 35,
+              color: Colors.grey.shade200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: const Text(
+                "Scanează",
+                style: TextStyle(color: Colors.black),
               ),
             ),
             const SizedBox(
               height: 32,
             ),
-            Slider(
-              activeColor: Colors.amber,
-              inactiveColor: Colors.amberAccent,
-              value: _recycledPlastic,
-              max: (1 - widget.plastic) * 100,
-              divisions: 100,
-              label: _recycledPlastic.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  _recycledPlastic = value;
-                });
-              },
-            ),
             const Text(
-              "Plastic",
+              "sau",
               style: TextStyle(
                 color: Colors.grey,
-                fontSize: 12,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Slider(
-              activeColor: Colors.brown,
-              inactiveColor: Colors.brown,
-              value: _recycledHartie,
-              max: (1 - widget.hartie) * 100,
-              divisions: 100,
-              label: _recycledHartie.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  _recycledHartie = value;
-                });
-              },
-            ),
             const Text(
-              "Hartie",
+              "introdu manual detaliile",
               style: TextStyle(
                 color: Colors.grey,
-                fontSize: 12,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Slider(
-              inactiveColor: Colors.blueAccent,
-              value: _recycledSticla,
-              max: (1 - widget.sticla) * 100,
-              divisions: 100,
-              label: _recycledSticla.round().toString(),
-              onChanged: (double value) {
-                setState(() {
-                  _recycledSticla = value;
-                });
-              },
+            const SizedBox(
+              height: 6,
             ),
-            const Text(
-              "Sticla",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: SizedBox(
+                    width: 100,
+                    child: DropdownButtonFormField(
+                      hint: _objectType == ''
+                          ? const Text("Material")
+                          : Text(_objectType),
+                      items: ["Carton", "Plastic", "Sticlă"].map(
+                        (value) {
+                          return DropdownMenuItem<String>(
+                            child: Text(value),
+                            value: value,
+                          );
+                        },
+                      ).toList(),
+                      decoration:
+                          InputDecoration(contentPadding: EdgeInsets.zero),
+                      onChanged: (value) {
+                        if (value is String) {
+                          setState(() {
+                            _objectType = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 6,
+                ),
+                Flexible(
+                  flex: 1,
+                  fit: FlexFit.loose,
+                  child: SizedBox(
+                    width: 70,
+                    child: TextFormField(
+                      controller: _objectVolume,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.only(bottom: 14),
+                        alignLabelWithHint: true,
+                        labelText: "Volum",
+                        hintText: "În mL",
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 6,
+            ),
+            MaterialButton(
+              onPressed: () {
+
+              },
+              elevation: 0,
+              height: 35,
+              color: Colors.grey.shade200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: const Text(
+                "Adaugă",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            const SizedBox(
+              height: 32,
+            ),
+           Padding(
+             padding: const EdgeInsets.all(8.0),
+             child: LinearPercentIndicator(
+               percent: _progressHartie,
+               leading: Text("Carton"),
+             ),
+           ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: LinearPercentIndicator(
+                percent: _progressPlastic,
+                leading: Text("Plastic"),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: LinearPercentIndicator(
+                percent: _progressSticla,
+                leading: Text("Sticlă"),
               ),
             ),
             const SizedBox(
@@ -128,6 +190,11 @@ class _addRecycledItemsState extends State<addRecycledItems> {
             ),
             MaterialButton(
               onPressed: () async {
+                if (_recycledHartie == 0 &&
+                    _recycledSticla == 0 &&
+                    _recycledPlastic == 0) {
+                  return;
+                }
                 var awaitPointData = await ApiClient.database.listDocuments(
                   collectionId: Config.recyclePointsID,
                   queries: [Query.equal("id", widget.id)],
@@ -135,11 +202,14 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                 var recyclePointData = awaitPointData.documents
                     .map((document) => recyclePoint.fromJson(document.data))
                     .first;
-                recyclePointData.statPlastic += _recycledPlastic.round() / 100;
-                recyclePointData.statHartie += _recycledHartie.round() / 100;
-                recyclePointData.statSticla += _recycledSticla.round() / 100;
+                recyclePointData.statPlastic += _recycledPlastic;
+                recyclePointData.statHartie += _recycledHartie;
+                recyclePointData.statSticla += _recycledSticla;
                 var mapOfData = recyclePointData.toMap();
-                await ApiClient.database.updateDocument(collectionId: Config.recyclePointsID, documentId: recyclePointData.docID, data: mapOfData);
+                await ApiClient.database.updateDocument(
+                    collectionId: Config.recyclePointsID,
+                    documentId: recyclePointData.docID,
+                    data: mapOfData);
                 String gmapsLink =
                     'https://www.google.com/maps/search/?api=1&query=${widget.location.latitude},${widget.location.longitude}';
                 await launchUrl(Uri.parse(gmapsLink));
