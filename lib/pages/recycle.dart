@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -28,10 +29,11 @@ class addRecycledItems extends StatefulWidget {
 }
 
 class _addRecycledItemsState extends State<addRecycledItems> {
-  late int _recycledPlastic = 0;
-  late int _recycledSticla = 0;
-  late int _recycledHartie = 0;
-  late double _progressPlastic = 0, _progressSticla = 0, _progressHartie = 0;
+  late int _availablePlastic = widget.plastic;
+  late int _availableSticla = widget.sticla;
+  late int _availableCarton = widget.hartie;
+  late int _progressPlastic = 0, _progressSticla = 0, _progressCarton = 0;
+  late double _percentPlastic = 0, _percentSticla = 0, _percentCarton = 0;
   late String _objectType = '';
   TextEditingController _objectVolume = TextEditingController();
 
@@ -56,7 +58,16 @@ class _addRecycledItemsState extends State<addRecycledItems> {
               height: 6,
             ),
             MaterialButton(
-              onPressed: () {},
+              onPressed: () async {
+                String? objectCode;
+                try {
+                  objectCode = await FlutterBarcodeScanner.scanBarcode(
+                      "#ff6666", "Înapoi", false, ScanMode.BARCODE);
+                }on PlatformException{
+                  objectCode = 'Failed to scan code';
+                }
+                if (!mounted) return;
+              },
               elevation: 0,
               height: 35,
               color: Colors.grey.shade200,
@@ -148,7 +159,71 @@ class _addRecycledItemsState extends State<addRecycledItems> {
             ),
             MaterialButton(
               onPressed: () {
-
+                int? _objectVolumeInt = int.tryParse(_objectVolume.text);
+                if (_objectType == 'Carton') {
+                  if (_availableCarton >= _objectVolumeInt!) {
+                    _progressCarton += _objectVolumeInt;
+                    _availableCarton -= _objectVolumeInt;
+                    setState(() {
+                      _percentCarton = _progressCarton / widget.hartie;
+                    });
+                    const snack = SnackBar(
+                      content:
+                          Text("Adăugat in lista de reciclare!"),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snack);
+                  }
+                  else
+                    {
+                      var snack = SnackBar(
+                        content:
+                        Text("Volum prea mare! Disponibili doar " + _availableCarton.toString() + " mL."),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snack);
+                    }
+                } else if (_objectType == 'Plastic') {
+                  if (_availablePlastic >= _objectVolumeInt!) {
+                    _progressPlastic += _objectVolumeInt;
+                    _availablePlastic -= _objectVolumeInt;
+                    setState(() {
+                      _percentPlastic = _progressPlastic / widget.plastic;
+                    });
+                    const snack = SnackBar(
+                      content:
+                      Text("Adăugat in lista de reciclare!"),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snack);
+                  }
+                  else
+                  {
+                    var snack = SnackBar(
+                      content:
+                      Text("Volum prea mare! Disponibili doar " + _availablePlastic.toString() + " mL."),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snack);
+                  }
+                } else if (_objectType == 'Sticlă') {
+                  if (_availableSticla >= _objectVolumeInt!) {
+                    _progressSticla += _objectVolumeInt;
+                    _availableSticla -= _objectVolumeInt;
+                    setState(() {
+                      _percentSticla = _progressSticla / widget.sticla;
+                    });
+                    const snack = SnackBar(
+                      content:
+                      Text("Adăugat in lista de reciclare!"),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snack);
+                  }
+                  else
+                  {
+                    var snack = SnackBar(
+                      content:
+                      Text("Volum prea mare! Disponibili doar " + _availableSticla.toString() + " mL."),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snack);
+                  }
+                }
               },
               elevation: 0,
               height: 35,
@@ -164,25 +239,28 @@ class _addRecycledItemsState extends State<addRecycledItems> {
             const SizedBox(
               height: 32,
             ),
-           Padding(
-             padding: const EdgeInsets.all(8.0),
-             child: LinearPercentIndicator(
-               percent: _progressHartie,
-               leading: Text("Carton"),
-             ),
-           ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: LinearPercentIndicator(
-                percent: _progressPlastic,
-                leading: Text("Plastic"),
+                percent: _percentCarton,
+                leading: Text("Carton"),
+                progressColor: Colors.red,
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: LinearPercentIndicator(
-                percent: _progressSticla,
+                percent: _percentPlastic,
+                leading: Text("Plastic"),
+                progressColor: Colors.blue,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: LinearPercentIndicator(
+                percent: _percentSticla,
                 leading: Text("Sticlă"),
+                progressColor: Colors.yellow,
               ),
             ),
             const SizedBox(
@@ -190,9 +268,9 @@ class _addRecycledItemsState extends State<addRecycledItems> {
             ),
             MaterialButton(
               onPressed: () async {
-                if (_recycledHartie == 0 &&
-                    _recycledSticla == 0 &&
-                    _recycledPlastic == 0) {
+                if (_progressSticla == 0 &&
+                    _progressPlastic == 0 &&
+                    _progressCarton == 0) {
                   return;
                 }
                 var awaitPointData = await ApiClient.database.listDocuments(
@@ -202,9 +280,9 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                 var recyclePointData = awaitPointData.documents
                     .map((document) => recyclePoint.fromJson(document.data))
                     .first;
-                recyclePointData.statPlastic += _recycledPlastic;
-                recyclePointData.statHartie += _recycledHartie;
-                recyclePointData.statSticla += _recycledSticla;
+                recyclePointData.statPlastic += _progressPlastic;
+                recyclePointData.statHartie += _progressCarton;
+                recyclePointData.statSticla += _progressSticla;
                 var mapOfData = recyclePointData.toMap();
                 await ApiClient.database.updateDocument(
                     collectionId: Config.recyclePointsID,
