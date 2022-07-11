@@ -63,7 +63,7 @@ class _RecyclePageState extends State<RecyclePage> {
               future: getRecyclePointDataFuture,
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
-                  recyclePoint data = snapshot.data;
+                  RecyclePoint data = snapshot.data;
                   hartie = data.statHartie;
                   sticla = data.statSticla;
                   plastic = data.statPlastic;
@@ -170,16 +170,16 @@ class _RecyclePageState extends State<RecyclePage> {
     );
   }
 
-  Future<recyclePoint?> _getRecyclePointData() async {
+  Future<RecyclePoint?> _getRecyclePointData() async {
     try {
       var awaitPointData = await ApiClient.database.listDocuments(
         collectionId: Config.recyclePointsID,
         queries: [Query.equal("pointID", widget.id)],
       );
       var recyclePointData = awaitPointData.documents
-          .map((document) => recyclePoint.fromJson(document.data))
+          .map((document) => RecyclePoint.fromJson(document.data))
           .first;
-      return recyclePoint(
+      return RecyclePoint(
         docID: recyclePointData.docID,
         statPlastic: recyclePointData.statPlastic,
         statSticla: recyclePointData.statSticla,

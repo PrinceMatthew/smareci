@@ -1,12 +1,12 @@
-class recyclePoint {
+class RecyclePoint {
   late int statPlastic;
   late int statHartie;
   late int statSticla;
   late String docID;
 
-  recyclePoint({required this.statPlastic, required this.statSticla, required this.statHartie, required this.docID});
+  RecyclePoint({required this.statPlastic, required this.statSticla, required this.statHartie, required this.docID});
 
-  recyclePoint.fromJson(Map<String, dynamic> json) {
+  RecyclePoint.fromJson(Map<String, dynamic> json) {
     docID = json['\$id'];
     statHartie = json["ocupareHartie"];
     statPlastic = json["ocuparePlastic"];
