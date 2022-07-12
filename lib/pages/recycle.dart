@@ -331,6 +331,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                 String gmapsLink =
                     'https://www.google.com/maps/search/?api=1&query=${widget.location.latitude},${widget.location.longitude}';
                 await launchUrl(Uri.parse(gmapsLink));
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
               elevation: 0,
               height: 35,
