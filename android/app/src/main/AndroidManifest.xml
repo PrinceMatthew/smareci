@@ -2,9 +2,9 @@
     package="com.smareci.app">
     <uses-permission android:name="android.permission.CAMERA" />
    <application
-        android:label="smareci"
+        android:label="Smareci"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/smareci">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${GMAPS_KEY}" />

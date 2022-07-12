@@ -72,30 +72,39 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                   collectionId: Config.objectCodesID,
                   queries: [Query.equal("barcode", objectCode)],
                 );
+                if (awaitObjectData.total == 0) {
+                  var snack = SnackBar(
+                    content: Text("Obiectul nu a fost găsit în baza de date!"),
+                    duration: Duration(seconds: 1),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snack);
+                  return;
+                }
                 var recycledObjectData = awaitObjectData.documents
                     .map((document) => RecycledObject.fromJson(document.data))
                     .first;
                 if (recycledObjectData.type == "Plastic") {
                   _progressPlastic += recycledObjectData.volume;
                   _availablePlastic -= recycledObjectData.volume;
-                  setState((){
-                   _percentPlastic = _progressPlastic / _availablePlastic;
+                  setState(() {
+                    _percentPlastic = _progressPlastic / _availablePlastic;
                   });
                 } else if (recycledObjectData.type == "Carton") {
                   _progressCarton += recycledObjectData.volume;
                   _availableCarton -= recycledObjectData.volume;
-                  setState((){
+                  setState(() {
                     _percentCarton = _progressCarton / _availableCarton;
                   });
                 } else if (recycledObjectData.type == "Sticlă") {
                   _progressSticla += recycledObjectData.volume;
                   _availableSticla -= recycledObjectData.volume;
-                  setState((){
+                  setState(() {
                     _percentSticla = _progressSticla / _availableSticla;
                   });
                 }
                 var snack = SnackBar(
                   content: Text("Obiectul scanat a fost adăugat!"),
+                  duration: Duration(seconds: 1),
                 );
                 ScaffoldMessenger.of(context).showSnackBar(snack);
               },
@@ -200,6 +209,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                     });
                     const snack = SnackBar(
                       content: Text("Adăugat in lista de reciclare!"),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   } else {
@@ -207,6 +217,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                       content: Text("Volum prea mare! Disponibili doar " +
                           _availableCarton.toString() +
                           " mL."),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   }
@@ -219,6 +230,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                     });
                     const snack = SnackBar(
                       content: Text("Adăugat in lista de reciclare!"),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   } else {
@@ -226,6 +238,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                       content: Text("Volum prea mare! Disponibili doar " +
                           _availablePlastic.toString() +
                           " mL."),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   }
@@ -238,6 +251,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                     });
                     const snack = SnackBar(
                       content: Text("Adăugat in lista de reciclare!"),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   } else {
@@ -245,6 +259,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                       content: Text("Volum prea mare! Disponibili doar " +
                           _availableSticla.toString() +
                           " mL."),
+                      duration: Duration(seconds: 1),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   }
@@ -268,16 +283,16 @@ class _addRecycledItemsState extends State<addRecycledItems> {
               padding: const EdgeInsets.all(8.0),
               child: LinearPercentIndicator(
                 percent: _percentCarton,
-                leading: Text("Carton"),
-                progressColor: Colors.red,
+                leading: Text("Carton/Hârtie"),
+                progressColor: Colors.blue,
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: LinearPercentIndicator(
                 percent: _percentPlastic,
-                leading: Text("Plastic"),
-                progressColor: Colors.blue,
+                leading: Text("Plastic/Metal"),
+                progressColor: Colors.yellow,
               ),
             ),
             Padding(
@@ -285,7 +300,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
               child: LinearPercentIndicator(
                 percent: _percentSticla,
                 leading: Text("Sticlă"),
-                progressColor: Colors.yellow,
+                progressColor: Colors.green,
               ),
             ),
             const SizedBox(

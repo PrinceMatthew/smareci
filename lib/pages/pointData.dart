@@ -75,7 +75,7 @@ class _RecyclePageState extends State<RecyclePage> {
                         percent: data.statPlastic.toDouble() / 100000,
                         animation: true,
                         center: Text("Plastic/Metal"),
-                        progressColor: Colors.yellowAccent,
+                        progressColor: Colors.yellow,
                       ),
                       SizedBox(
                         height: 16,
@@ -86,7 +86,7 @@ class _RecyclePageState extends State<RecyclePage> {
                         percent: data.statSticla.toDouble() / 100000,
                         animation: true,
                         center: Text("Sticlă"),
-                        progressColor: Colors.blueAccent,
+                        progressColor: Colors.green,
                       ),
                       SizedBox(
                         height: 16,
@@ -97,7 +97,7 @@ class _RecyclePageState extends State<RecyclePage> {
                         percent: data.statHartie.toDouble() / 100000,
                         animation: true,
                         center: Text("Hârtie/Carton"),
-                        progressColor: Colors.brown,
+                        progressColor: Colors.blue,
                       ),
                     ],
                   );
