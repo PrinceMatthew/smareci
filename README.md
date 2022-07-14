@@ -39,6 +39,7 @@ Pentru construirea aplicației, am folosit librăriile:
 > - [url_launcher](https://pub.dev/packages/url_launcher "url_launcher")
 > - [appwrite](https://pub.dev/packages/appwrite "appwrite")
 >- [flutter_barcode_scanner](https://pub.dev/packages/flutter_barcode_scanner)
+>- [gradient_widgets](https://pub.dev/packages/gradient_widgets)
 
 [Appwrite](https://appwrite.io "Appwrite") este un container Docker care ajută la implementarea unei baze de date optimizate în aplicații scrise în [Dart](https://dart.dev "Dart").
 
