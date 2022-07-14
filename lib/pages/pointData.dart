@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:smareci/api.dart';
-import 'package:smareci/assets/recyclePoint.dart';
 import 'package:smareci/config.dart';
+import 'package:smareci/models/recyclePoint.dart';
 import 'package:smareci/pages/recycle.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -138,7 +138,7 @@ class _RecyclePageState extends State<RecyclePage> {
                 if (plastic == maxCapacity && hartie == maxCapacity && sticla == maxCapacity) {
                   const snack = SnackBar(
                     content:
-                        Text("Momentan nu mai poti recicla la acest punct."),
+                        Text("Momentan nu mai poți recicla la acest punct."),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(snack);
                 } else {

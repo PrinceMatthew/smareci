@@ -1,15 +1,16 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smareci/assets/object.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:smareci/models/object.dart';
+import 'package:smareci/pages/thankyou.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
-import '../assets/recyclePoint.dart';
 import '../config.dart';
+import '../models/recyclePoint.dart';
 
 class addRecycledItems extends StatefulWidget {
   const addRecycledItems({
@@ -264,6 +265,10 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                     ScaffoldMessenger.of(context).showSnackBar(snack);
                   }
                 }
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
               },
               elevation: 0,
               height: 35,
@@ -332,6 +337,7 @@ class _addRecycledItemsState extends State<addRecycledItems> {
                     'https://www.google.com/maps/search/?api=1&query=${widget.location.latitude},${widget.location.longitude}';
                 await launchUrl(Uri.parse(gmapsLink));
                 Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => ThankYou()));
               },
               elevation: 0,
               height: 35,
